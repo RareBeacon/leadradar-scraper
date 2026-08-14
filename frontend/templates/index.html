@@ -330,6 +330,10 @@
                                     <input type="checkbox" id="source_yelp" checked class="rounded border-violet-950 bg-slate-950 text-violet-600 focus:ring-violet-500">
                                     <span>Yelp</span>
                                 </label>
+                                <label class="flex items-center space-x-2 text-sm text-slate-300">
+                                    <input type="checkbox" id="source_yc" class="rounded border-violet-950 bg-slate-950 text-violet-600 focus:ring-violet-500">
+                                    <span class="text-fuchsia-400 font-bold">YCombinator 🚀</span>
+                                </label>
                             </div>
                         </div>
                     </div>
@@ -485,9 +489,10 @@
                             <thead class="bg-slate-950 text-slate-300 font-bold sticky top-0 uppercase tracking-wider">
                                 <tr>
                                     <th class="px-3 py-3 border-b border-violet-950/40">Business Name</th>
-                                    <th class="px-3 py-3 border-b border-violet-950/40">Phone</th>
+                                    <th class="px-3 py-3 border-b border-violet-950/40">Founders / Team</th>
                                     <th class="px-3 py-3 border-b border-violet-950/40">Website</th>
                                     <th class="px-3 py-3 border-b border-violet-950/40">Email</th>
+                                    <th class="px-3 py-3 border-b border-violet-950/40">Socials</th>
                                     <th class="px-3 py-3 border-b border-violet-950/40">Status</th>
                                     <th class="px-3 py-3 border-b border-violet-950/40">Action</th>
                                 </tr>
@@ -604,6 +609,33 @@
                 <div>
                     <label class="block text-xxs font-bold uppercase tracking-wider text-slate-400 mb-1">Email</label>
                     <p class="text-sm font-bold text-white py-1" id="modal-biz-email">-</p>
+                </div>
+
+                <div id="modal-yc-enrichment" class="hidden bg-slate-950/40 border border-violet-950/30 p-4 rounded-xl space-y-3.5">
+                    <div class="text-xxs font-extrabold uppercase tracking-wider text-fuchsia-400 flex items-center"><i class="fa-solid fa-rocket mr-1.5"></i>YCombinator Sourced Details</div>
+                    <div class="grid grid-cols-2 gap-3 text-xs">
+                        <div>
+                            <span class="text-slate-400 block font-semibold">Founders:</span>
+                            <span id="modal-yc-founders" class="text-white font-bold">-</span>
+                        </div>
+                        <div>
+                            <span class="text-slate-400 block font-semibold">Team Size:</span>
+                            <span id="modal-yc-employees" class="text-white font-bold">-</span>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3 text-xs">
+                        <div>
+                            <span class="text-slate-400 block font-semibold">LinkedIn Profile:</span>
+                            <a id="modal-yc-linkedin" href="#" target="_blank" class="text-blue-400 hover:underline flex items-center space-x-1 font-bold"><span>LinkedIn</span> <i class="fa-brands fa-linkedin"></i></a>
+                        </div>
+                        <div>
+                            <span class="text-slate-400 block font-semibold">Twitter Profile:</span>
+                            <a id="modal-yc-twitter" href="#" target="_blank" class="text-sky-400 hover:underline flex items-center space-x-1 font-bold"><span>Twitter</span> <i class="fa-brands fa-twitter"></i></a>
+                        </div>
+                    </div>
+                    <div class="border-t border-violet-950/20 pt-2 text-xxs text-slate-300 leading-relaxed italic border-l-2 border-fuchsia-500 pl-2.5 bg-fuchsia-500/5 py-1.5 rounded" id="modal-yc-launch">
+                        -
+                    </div>
                 </div>
 
                 <div>
@@ -881,14 +913,26 @@
                                 ? `<button class="text-slate-500 bg-slate-900 border border-slate-800 py-1 px-2.5 rounded-lg font-bold" disabled>In CRM</button>`
                                 : `<button onclick="addSingleLeadToCRM(${b.id})" class="bg-violet-600 hover:bg-violet-500 text-white py-1 px-2.5 rounded-lg font-bold">Add to CRM</button>`;
                             
-                            const websiteCell = b.website ? `<a href="${b.website}" target="_blank" class="text-violet-400 hover:underline truncate max-w-xxs block"><span>${b.website.replace("http://127.0.0.1:8000/mock-site/", "")}</span></a>` : `<span class="text-slate-600">-</span>`;
+                            const websiteCell = b.website ? `<a href="${b.website}" target="_blank" class="text-violet-400 hover:underline truncate max-w-xxs block"><span>${b.website.replace("http://127.0.0.1:8000/mock-site/", "").replace("https://", "")}</span></a>` : `<span class="text-slate-600">-</span>`;
+                            
+                            const foundersCell = b.founders 
+                                ? `<div class="text-white font-semibold">${b.founders}</div><div class="text-xxs text-slate-400 mt-0.5">${b.employees_count ? `${b.employees_count} Employees` : 'Team Sourced'}</div>`
+                                : `<div class="text-slate-300">${b.phone || '-'}</div>`;
+                                
+                            const socialsCell = b.linkedin_url 
+                                ? `<div class="flex items-center space-x-2">
+                                     <a href="${b.linkedin_url}" target="_blank" class="text-blue-400 hover:text-blue-300"><i class="fa-brands fa-linkedin fa-lg"></i></a>
+                                     <a href="${b.twitter_url || '#'}" target="_blank" class="text-sky-400 hover:text-sky-300"><i class="fa-brands fa-twitter fa-lg"></i></a>
+                                   </div>`
+                                : `<span class="text-slate-600">-</span>`;
                             
                             return `
                             <tr class="hover:bg-violet-950/10">
                                 <td class="px-3 py-3 font-bold text-white truncate max-w-xxs">${b.business_name}</td>
-                                <td class="px-3 py-3 text-slate-300 whitespace-nowrap">${b.phone || '<span class="text-slate-600">-</span>'}</td>
+                                <td class="px-3 py-3">${foundersCell}</td>
                                 <td class="px-3 py-3">${websiteCell}</td>
                                 <td class="px-3 py-3 font-semibold text-slate-200">${b.email ? b.email : '<span class="text-slate-600">-</span>'}</td>
+                                <td class="px-3 py-3">${socialsCell}</td>
                                 <td class="px-3 py-3">${statusBadge}</td>
                                 <td class="px-3 py-3">${crmBtn}</td>
                             </tr>
@@ -938,6 +982,7 @@
             const sources = [];
             if (document.getElementById("source_yp").checked) sources.push("yellowpages");
             if (document.getElementById("source_yelp").checked) sources.push("yelp");
+            if (document.getElementById("source_yc").checked) sources.push("ycombinator");
             
             if (sources.length === 0) {
                 alert("Please select at least one source directory (Yellow Pages or Yelp).");
@@ -1013,12 +1058,19 @@
                 } else {
                     container.innerHTML = lanes[status].map(lead => {
                         const emailCell = lead.email ? `<div class="text-xs font-semibold text-violet-300 truncate mt-1.5"><i class="fa-solid fa-envelope mr-1 text-slate-500"></i>${lead.email}</div>` : '';
+                        
+                        let subtitleCell = `<div class="text-xxs text-slate-400 mt-1 uppercase font-bold tracking-wider">${lead.city || ''}, ${lead.state || 'OUTREACH'}</div>`;
+                        if (lead.founders) {
+                            const mainFounder = lead.founders.split(",")[0];
+                            subtitleCell = `<div class="text-xxs text-fuchsia-400 mt-1 font-bold tracking-wider flex items-center"><i class="fa-solid fa-rocket mr-1 text-fuchsia-500"></i>${mainFounder} (YC Founder)</div>`;
+                        }
+                        
                         const phoneCell = lead.phone ? `<div class="text-xxs text-slate-400 truncate mt-1"><i class="fa-solid fa-phone mr-1 text-slate-500"></i>${lead.phone}</div>` : '';
                         
                         return `
                         <div onclick="openCRMModal('${lead.fingerprint}')" class="bg-[#0b0813] hover:bg-[#130c2c] border border-violet-950/40 hover:border-violet-500/40 rounded-xl p-3.5 cursor-pointer transition">
                             <div class="text-xs font-extrabold text-white truncate">${lead.business_name}</div>
-                            <div class="text-xxs text-slate-400 mt-1 uppercase font-bold tracking-wider">${lead.city || ''}, ${lead.state || 'OUTREACH'}</div>
+                            ${subtitleCell}
                             ${emailCell}
                             ${phoneCell}
                         </div>
@@ -1096,6 +1148,25 @@
             }
             
             document.getElementById("modal-biz-email").innerText = lead.email || 'No email found';
+            
+            // YC Sourced conditional elements
+            const ycPanel = document.getElementById("modal-yc-enrichment");
+            if (lead.founders) {
+                document.getElementById("modal-yc-founders").innerText = lead.founders;
+                document.getElementById("modal-yc-employees").innerText = `${lead.employees_count || '5'} Employees`;
+                
+                const liAnchor = document.getElementById("modal-yc-linkedin");
+                liAnchor.href = lead.linkedin_url || '#';
+                
+                const twAnchor = document.getElementById("modal-yc-twitter");
+                twAnchor.href = lead.twitter_url || '#';
+                
+                document.getElementById("modal-yc-launch").innerText = lead.launch_text || '';
+                ycPanel.classList.remove("hidden");
+            } else {
+                ycPanel.classList.add("hidden");
+            }
+            
             document.getElementById("modal-biz-notes").value = lead.crm_notes || '';
             
             document.getElementById("crm-details-modal").classList.remove("hidden");

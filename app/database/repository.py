@@ -111,7 +111,14 @@ def add_business(db: Session, job_id: str, data: dict) -> Business:
         longitude=data.get("longitude"),
         scraped_at=datetime.datetime.utcnow(),
         confidence=data.get("confidence", 1.0),
-        fingerprint=data.get("fingerprint")
+        fingerprint=data.get("fingerprint"),
+        
+        # YC fields
+        founders=data.get("founders"),
+        employees_count=data.get("employees_count"),
+        linkedin_url=data.get("linkedin_url"),
+        twitter_url=data.get("twitter_url"),
+        launch_text=data.get("launch_text")
     )
     db.add(business)
     db.commit()

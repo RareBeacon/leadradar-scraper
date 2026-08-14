@@ -62,6 +62,14 @@ class BusinessResponse(BaseModel):
     source: str
     source_url: Optional[str] = None
     source_business_url: Optional[str] = None
+    
+    # YC Specific Sourcing
+    founders: Optional[str] = None
+    employees_count: Optional[int] = None
+    linkedin_url: Optional[str] = None
+    twitter_url: Optional[str] = None
+    launch_text: Optional[str] = None
+    
     latitude: Optional[float] = None
     longitude: Optional[float] = None
     scraped_at: datetime

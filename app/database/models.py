@@ -68,6 +68,13 @@ class Business(Base):
     source_url = Column(String, nullable=True) # Search list page URL
     source_business_url = Column(String, nullable=True) # Detail profile URL
     
+    # YC Sourcing fields
+    founders = Column(String, nullable=True) # Comma-separated list of founders
+    employees_count = Column(Integer, nullable=True)
+    linkedin_url = Column(String, nullable=True)
+    twitter_url = Column(String, nullable=True)
+    launch_text = Column(Text, nullable=True)
+    
     # Geospatial
     latitude = Column(Float, nullable=True)
     longitude = Column(Float, nullable=True)

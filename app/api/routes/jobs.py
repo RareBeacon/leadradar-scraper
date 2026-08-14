@@ -102,7 +102,8 @@ def export_job_results(job_id: str, export_format: str, db: Session = Depends(ge
         "Street", "Postal Code", "Phone", "Website", "Email", 
         "Email Source URL", "Email Type", "Email Status", "Source Directory", 
         "Source Category URL", "Source Business Detail URL", "Latitude", "Longitude", 
-        "Scraped At", "Confidence Score"
+        "Scraped At", "Confidence Score", "YC Founders", "YC Employees Count", 
+        "YC LinkedIn URL", "YC Twitter URL", "YC Launch Text"
     ]
     
     def format_row(b) -> list:
@@ -112,7 +113,8 @@ def export_job_results(job_id: str, export_format: str, db: Session = Depends(ge
             b.email_source, b.email_type, b.email_status, b.source,
             b.source_url, b.source_business_url, b.latitude, b.longitude,
             b.scraped_at.strftime("%Y-%m-%d %H:%M:%S") if b.scraped_at else "",
-            b.confidence
+            b.confidence,
+            b.founders, b.employees_count, b.linkedin_url, b.twitter_url, b.launch_text
         ]
         
     if export_format == "csv":
@@ -172,7 +174,14 @@ def export_job_results(job_id: str, export_format: str, db: Session = Depends(ge
                 "latitude": b.latitude,
                 "longitude": b.longitude,
                 "scraped_at": b.scraped_at.strftime("%Y-%m-%d %H:%M:%S") if b.scraped_at else None,
-                "confidence": b.confidence
+                "confidence": b.confidence,
+                
+                # YC Fields
+                "founders": b.founders,
+                "employees_count": b.employees_count,
+                "linkedin_url": b.linkedin_url,
+                "twitter_url": b.twitter_url,
+                "launch_text": b.launch_text
             })
             
         import json

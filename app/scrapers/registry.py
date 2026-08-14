@@ -2,10 +2,12 @@ from typing import Dict, Type, Optional
 from app.scrapers.base import BaseScraper
 from app.scrapers.yellowpages import YellowPagesScraper
 from app.scrapers.yelp import YelpScraper
+from app.scrapers.ycombinator import YCombinatorScraper
 
 SCRAPER_REGISTRY: Dict[str, Type[BaseScraper]] = {
     "yellowpages": YellowPagesScraper,
-    "yelp": YelpScraper
+    "yelp": YelpScraper,
+    "ycombinator": YCombinatorScraper
 }
 
 def get_scraper(source: str, category: str, country: str, state: Optional[str] = None, city: Optional[str] = None, max_results: int = 100) -> Optional[BaseScraper]:
