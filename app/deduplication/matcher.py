@@ -45,8 +45,14 @@ def match_businesses(b1: Dict[str, Any], b2: Dict[str, Any]) -> Tuple[bool, floa
     Returns: (is_match, confidence, match_reason)
     """
     # 1. Check phone number (very strong match)
-    phone1 = normalize_phone_number(b1.get("phone"))
-    phone2 = normalize_phone_number(b2.get("phone"))
+    phone1 = b1.get("_norm_phone")
+    if phone1 is None:
+        phone1 = normalize_phone_number(b1.get("phone")) or ""
+        
+    phone2 = b2.get("_norm_phone")
+    if phone2 is None:
+        phone2 = normalize_phone_number(b2.get("phone")) or ""
+        
     if phone1 and phone2 and phone1 == phone2:
         return True, 0.98, "phone_match"
         
@@ -57,9 +63,26 @@ def match_businesses(b1: Dict[str, Any], b2: Dict[str, Any]) -> Tuple[bool, floa
         return True, 0.95, "website_domain_match"
         
     # 3. Check name similarity and city/address
-    name1 = clean_name(b1.get("business_name", ""))
-    name2 = clean_name(b2.get("business_name", ""))
+    name1 = b1.get("_clean_name")
+    if name1 is None:
+        name1 = clean_name(b1.get("business_name", "")) or ""
+        
+    name2 = b2.get("_clean_name")
+    if name2 is None:
+        name2 = clean_name(b2.get("business_name", "")) or ""
     
+    # Quick pre-filter: if different brand prefixes, skip expensive fuzzy matching
+    w1 = b1.get("_brand_prefix")
+    if w1 is None:
+        w1 = name1.split()[0] if name1.split() else ""
+        
+    w2 = b2.get("_brand_prefix")
+    if w2 is None:
+        w2 = name2.split()[0] if name2.split() else ""
+        
+    if w1 and w2 and w1 != w2:
+        return False, 0.0, "different_brand_prefixes"
+        
     name_similarity = fuzz.token_sort_ratio(name1, name2) / 100.0
     
     # Check street address (if exists)
