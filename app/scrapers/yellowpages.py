@@ -7,6 +7,19 @@ from app.scrapers.base import BaseScraper
 from app.scrapers.synthetic import generate_synthetic_businesses
 from app.core.logging import logger
 
+COUNTRY_YP_DOMAINS = {
+    "united states": "www.yellowpages.com",
+    "usa": "www.yellowpages.com",
+    "us": "www.yellowpages.com",
+    "canada": "www.yellowpages.ca",
+    "ca": "www.yellowpages.ca",
+    "australia": "www.yellowpages.com.au",
+    "au": "www.yellowpages.com.au",
+    "united kingdom": "www.yell.com",
+    "uk": "www.yell.com",
+    "gb": "www.yell.com"
+}
+
 class YellowPagesScraper(BaseScraper):
     async def scrape(self, use_synthetic_fallback: bool = True) -> List[Dict[str, Any]]:
         """
@@ -14,11 +27,22 @@ class YellowPagesScraper(BaseScraper):
         """
         logger.info(f"YellowPagesScraper: Starting scrape for category='{self.category}' in '{self.location_str}'")
         
-        # Build Search URL
+        # Build Search URL based on target country Yellow Pages directory
         encoded_query = urllib.parse.quote_plus(self.category)
         encoded_loc = urllib.parse.quote_plus(self.location_str)
-        url = f"https://www.yellowpages.com/search?search_terms={encoded_query}&geo_location_terms={encoded_loc}"
         
+        country_lower = self.country.lower().strip()
+        domain = COUNTRY_YP_DOMAINS.get(country_lower, "www.yellowpages.com")
+        
+        if "yell.com" in domain:
+            url = f"https://www.yell.com/ucs/UcsSearchAction.do?keywords={encoded_query}&location={encoded_loc}"
+        elif "yellowpages.ca" in domain:
+            url = f"https://www.yellowpages.ca/search/si/1/{encoded_query}/{encoded_loc}"
+        elif "yellowpages.com.au" in domain:
+            url = f"https://www.yellowpages.com.au/search/listings?clue={encoded_query}&locationClue={encoded_loc}"
+        else:
+            url = f"https://{domain}/search?search_terms={encoded_query}&geo_location_terms={encoded_loc}"
+            
         html = await self.fetch_html(url)
         
         if not html:
