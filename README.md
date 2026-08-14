@@ -1,5 +1,14 @@
 # LeadRadar: Serious Business Intelligence Scraper & Enrichment Platform
 
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/RareBeacon/leadradar-scraper)
+
+### 🔗 Live Deployed Links
+*   **Live Web Dashboard (Vercel)**: [https://leadradar-dashboard.vercel.app](https://leadradar-dashboard.vercel.app)
+*   **Official GitHub Repository**: [https://github.com/RareBeacon/leadradar-scraper](https://github.com/RareBeacon/leadradar-scraper)
+*   **Persistent Backend Scraper**: Deploy with 1-click using the **Deploy to Render** button above!
+
+---
+
 LeadRadar is a production-grade, highly modular lead generation and contact discovery pipeline built in Python. Designed as a serious, professional intelligence system rather than a basic script, it decouples core orchestration from directory-specific selectors using a pluggable **adapter architecture**.
 
 ## 🚀 Key Features
