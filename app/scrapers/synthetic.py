@@ -103,9 +103,11 @@ def generate_synthetic_businesses(category: str, country: str, state: Optional[s
         p2 = random.choice(parts[1])
         p3 = random.choice(parts[2]) if parts[2] else ""
         
-        # Localize name slightly based on country if desired
         name = f"{p1} {p2} {p3}".strip()
-        if any(r["business_name"] == name for r in results):
+        # For high-volume requests, ensure absolute uniqueness by incorporating city names and sequential indices
+        if count > 50:
+            name = f"{p1} {p2} of {city_name} #{i+1}"
+        elif any(r["business_name"] == name for r in results):
             name = f"{p1} {city_name} {p2}"
             
         # Generate Street & Postal
