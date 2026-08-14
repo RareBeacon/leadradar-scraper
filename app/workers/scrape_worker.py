@@ -213,6 +213,12 @@ class ScrapeWorker:
 # Singleton worker helper to submit background asyncio tasks
 _worker = ScrapeWorker()
 
+async def run_worker_job(job_id: str):
+    """
+    Wrapper to execute worker job in FastAPI BackgroundTasks.
+    """
+    await _worker.run_job(job_id)
+
 def queue_background_job(job_id: str):
     """
     Submits the asyncio scraping task to the running event loop.

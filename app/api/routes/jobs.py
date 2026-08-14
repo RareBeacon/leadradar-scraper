@@ -2,7 +2,7 @@ import csv
 import io
 import uuid
 from typing import List, Optional
-from fastapi import APIRouter, Depends, HTTPException, Response, status
+from fastapi import APIRouter, Depends, HTTPException, Response, status, BackgroundTasks
 from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 from openpyxl import Workbook
@@ -10,12 +10,12 @@ from openpyxl import Workbook
 from app.database.session import get_db
 import app.database.repository as repo
 from app.api.schemas import JobCreate, JobResponse, BusinessResponse, JobLogResponse
-from app.workers.scrape_worker import queue_background_job
+from app.workers.scrape_worker import run_worker_job
 
 router = APIRouter(prefix="/api/jobs", tags=["jobs"])
 
 @router.post("/", response_model=JobResponse, status_code=status.HTTP_201_CREATED)
-def create_scraping_job(payload: JobCreate, db: Session = Depends(get_db)):
+def create_scraping_job(payload: JobCreate, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
     """
     Submits a new business scraping and enrichment job.
     """
@@ -39,9 +39,9 @@ def create_scraping_job(payload: JobCreate, db: Session = Depends(get_db)):
         enrich_dedupe=payload.enrich_dedupe
     )
     
-    # Dispatch background task asynchronously
+    # Dispatch background task asynchronously using FastAPI's robust native BackgroundTasks
     repo.add_job_log(db, job_id, "INFO", "Scrape job successfully queued in background worker.")
-    queue_background_job(job_id)
+    background_tasks.add_task(run_worker_job, job_id)
     
     return job
 
