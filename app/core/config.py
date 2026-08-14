@@ -2,7 +2,7 @@ import os
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
-    DATABASE_URL: str = "sqlite:////home/user/business-scraper/scraper.db"
+    DATABASE_URL: str = "sqlite:///scraper.db"
     LOG_LEVEL: str = "INFO"
     SCRAPER_TIMEOUT: int = 30
     DEFAULT_CONCURRENCY: int = 5
