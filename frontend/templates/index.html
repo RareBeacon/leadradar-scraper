@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Business Intelligence Scraper & Lead Enrichment</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .console-log {
+            font-family: 'Courier New', Courier, monospace;
+            background-color: #1a1a1a;
+            color: #4af626;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 min-h-screen flex flex-col">
+    <!-- Navbar -->
+    <nav class="bg-slate-950 text-white shadow-lg py-4 px-6">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="flex items-center space-x-3">
+                <i class="fa-solid fa-radar fa-2xl text-emerald-400"></i>
+                <span class="text-xl font-bold tracking-tight">LeadRadar <span class="text-emerald-400 text-sm font-semibold border border-emerald-400 px-1.5 py-0.5 rounded ml-1">v1.0</span></span>
+            </div>
+            <div class="flex items-center space-x-4">
+                <div class="flex items-center space-x-2 bg-slate-900 border border-slate-800 rounded px-2.5 py-1 text-xs">
+                    <span class="text-slate-400 font-semibold">API Server:</span>
+                    <input type="text" id="api-server-url" placeholder="e.g. http://localhost:8000" class="bg-transparent text-white focus:outline-none w-48 text-xxs font-mono">
+                </div>
+                <div class="text-sm text-slate-400 hidden sm:inline">
+                    <span class="font-medium text-slate-200">Arena Agent Mode</span> | Status: <span class="text-emerald-400 font-bold">Online</span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="flex-grow max-w-7xl mx-auto w-full p-4 lg:p-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Sidebar: Configuration -->
+        <div class="lg:col-span-1 space-y-6">
+            <div class="bg-white rounded-xl shadow-md border border-gray-200 p-6">
+                <div class="flex items-center space-x-2 border-b pb-4 mb-4">
+                    <i class="fa-solid fa-sliders text-emerald-500 text-lg"></i>
+                    <h2 class="text-lg font-bold text-gray-900">Scrape Configuration</h2>
+                </div>
+                
+                <form id="scrape-form" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-gray-600 mb-1">Business Category *</label>
+                        <input type="text" id="category" required placeholder="e.g. Roofing companies, Dentist, Plumbers" 
+                               class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-gray-600 mb-1">Country *</label>
+                            <input type="text" id="country" required value="United States" 
+                                   class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-gray-600 mb-1">State / Region</label>
+                            <input type="text" id="state" placeholder="e.g. Texas, NY" 
+                                   class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-gray-600 mb-1">City / Locality</label>
+                        <input type="text" id="city" placeholder="e.g. Houston, Dallas" 
+                               class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-gray-600 mb-1">Max Results</label>
+                            <input type="number" id="max_results" value="100" min="1" max="1000" 
+                                   class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-gray-600 mb-1">Directories</label>
+                            <div class="space-y-1 mt-1">
+                                <label class="flex items-center space-x-2 text-sm text-gray-700">
+                                    <input type="checkbox" id="source_yp" checked class="rounded border-gray-300 text-emerald-500 focus:ring-emerald-500">
+                                    <span>Yellow Pages</span>
+                                </label>
+                                <label class="flex items-center space-x-2 text-sm text-gray-700">
+                                    <input type="checkbox" id="source_yelp" checked class="rounded border-gray-300 text-emerald-500 focus:ring-emerald-500">
+                                    <span>Yelp</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="border-t pt-4 mt-2 space-y-2">
+                        <label class="block text-xs font-bold uppercase tracking-wider text-gray-600 mb-1">Enrichment Layers</label>
+                        
+                        <label class="flex items-center justify-between text-sm text-gray-700 py-1 border-b border-gray-100">
+                            <span class="flex items-center space-x-2">
+                                <i class="fa-solid fa-code text-blue-500 w-4"></i>
+                                <span>Website Discovery</span>
+                            </span>
+                            <input type="checkbox" id="enrich_website" checked class="rounded text-emerald-500">
+                        </label>
+                        
+                        <label class="flex items-center justify-between text-sm text-gray-700 py-1 border-b border-gray-100">
+                            <span class="flex items-center space-x-2">
+                                <i class="fa-solid fa-envelope text-indigo-500 w-4"></i>
+                                <span>Public Email Extraction</span>
+                            </span>
+                            <input type="checkbox" id="enrich_email" checked class="rounded text-emerald-500">
+                        </label>
+                        
+                        <label class="flex items-center justify-between text-sm text-gray-700 py-1 border-b border-gray-100">
+                            <span class="flex items-center space-x-2">
+                                <i class="fa-solid fa-shield-halved text-emerald-500 w-4"></i>
+                                <span>Email Verification (DNS/MX)</span>
+                            </span>
+                            <input type="checkbox" id="enrich_validate" checked class="rounded text-emerald-500">
+                        </label>
+                        
+                        <label class="flex items-center justify-between text-sm text-gray-700 py-1">
+                            <span class="flex items-center space-x-2">
+                                <i class="fa-solid fa-copy text-amber-500 w-4"></i>
+                                <span>Deduplicate Listings</span>
+                            </span>
+                            <input type="checkbox" id="enrich_dedupe" checked class="rounded text-emerald-500">
+                        </label>
+                    </div>
+                    
+                    <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-4 rounded-lg shadow transition duration-150 flex items-center justify-center space-x-2 mt-4">
+                        <i class="fa-solid fa-play"></i>
+                        <span>START CRAWL & ENRICH</span>
+                    </button>
+                </form>
+            </div>
+            
+            <!-- Jobs Registry -->
+            <div class="bg-white rounded-xl shadow-md border border-gray-200 p-6">
+                <div class="flex items-center justify-between border-b pb-4 mb-4">
+                    <div class="flex items-center space-x-2">
+                        <i class="fa-solid fa-history text-slate-500 text-lg"></i>
+                        <h2 class="text-lg font-bold text-gray-900">Job Registry</h2>
+                    </div>
+                    <button onclick="loadJobs()" class="text-slate-400 hover:text-emerald-500 transition duration-150">
+                        <i class="fa-solid fa-sync"></i>
+                    </button>
+                </div>
+                <div id="jobs-list" class="space-y-3 max-h-72 overflow-y-auto pr-1">
+                    <!-- Loaded dynamically -->
+                    <div class="text-center text-sm text-gray-400 py-4">No jobs registered. Submit a search query.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Body: Active Job Stats & Data -->
+        <div class="lg:col-span-2 space-y-6">
+            <!-- Job Stats & Progress Panel -->
+            <div id="job-details-panel" class="bg-white rounded-xl shadow-md border border-gray-200 p-6 hidden">
+                <div class="flex flex-col md:flex-row md:items-center justify-between border-b pb-4 mb-6">
+                    <div>
+                        <div class="flex items-center space-x-2">
+                            <span class="bg-emerald-100 text-emerald-800 text-xs font-bold px-2 py-0.5 rounded-full" id="detail-job-id">Job #XXXXXX</span>
+                            <h2 class="text-xl font-extrabold text-gray-900" id="detail-job-title">Roofing Companies</h2>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-1" id="detail-job-location">Houston, Texas, United States</p>
+                    </div>
+                    
+                    <!-- Export Actions -->
+                    <div class="mt-4 md:mt-0 flex flex-wrap gap-2" id="export-actions">
+                        <button onclick="exportData('xlsx')" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 font-bold py-1.5 px-3 rounded-lg text-sm flex items-center space-x-1.5 transition">
+                            <i class="fa-solid fa-file-excel"></i>
+                            <span>Excel</span>
+                        </button>
+                        <button onclick="exportData('csv')" class="bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 font-bold py-1.5 px-3 rounded-lg text-sm flex items-center space-x-1.5 transition">
+                            <i class="fa-solid fa-file-csv"></i>
+                            <span>CSV</span>
+                        </button>
+                        <button onclick="exportData('json')" class="bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 font-bold py-1.5 px-3 rounded-lg text-sm flex items-center space-x-1.5 transition">
+                            <i class="fa-solid fa-file-code"></i>
+                            <span>JSON</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Progress Bar -->
+                <div class="mb-6">
+                    <div class="flex justify-between items-center text-xs font-bold text-gray-600 uppercase mb-1">
+                        <span>Job Progress</span>
+                        <span id="detail-progress-percent">0%</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+                        <div id="detail-progress-bar" class="bg-gradient-to-r from-emerald-400 to-teal-600 h-full transition-all duration-300" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <!-- Live Metrics Grid -->
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4 mb-6">
+                    <div class="bg-slate-50 border rounded-lg p-3 text-center">
+                        <div class="text-xs font-semibold text-slate-500 uppercase">Discovered</div>
+                        <div class="text-xl font-extrabold text-slate-950 mt-1" id="metric-discovered">0</div>
+                    </div>
+                    <div class="bg-blue-50 border border-blue-100 rounded-lg p-3 text-center">
+                        <div class="text-xs font-semibold text-blue-500 uppercase">Websites</div>
+                        <div class="text-xl font-extrabold text-blue-950 mt-1" id="metric-websites">0</div>
+                    </div>
+                    <div class="bg-indigo-50 border border-indigo-100 rounded-lg p-3 text-center">
+                        <div class="text-xs font-semibold text-indigo-500 uppercase">Emails</div>
+                        <div class="text-xl font-extrabold text-indigo-950 mt-1" id="metric-emails">0</div>
+                    </div>
+                    <div class="bg-emerald-50 border border-emerald-100 rounded-lg p-3 text-center">
+                        <div class="text-xs font-semibold text-emerald-500 uppercase">Validated</div>
+                        <div class="text-xl font-extrabold text-emerald-950 mt-1" id="metric-validated">0</div>
+                    </div>
+                    <div class="bg-amber-50 border border-amber-100 rounded-lg p-3 text-center">
+                        <div class="text-xs font-semibold text-amber-500 uppercase">Duplicates</div>
+                        <div class="text-xl font-extrabold text-amber-950 mt-1" id="metric-duplicates">0</div>
+                    </div>
+                    <div class="bg-rose-50 border border-rose-100 rounded-lg p-3 text-center">
+                        <div class="text-xs font-semibold text-rose-500 uppercase">Errors</div>
+                        <div class="text-xl font-extrabold text-rose-950 mt-1" id="metric-errors">0</div>
+                    </div>
+                </div>
+
+                <!-- Tabs: Log Stream & Results Spreadsheet -->
+                <div class="border-b mb-4 flex space-x-6">
+                    <button id="tab-btn-logs" onclick="showTab('logs')" class="border-b-2 border-emerald-600 text-emerald-700 font-bold pb-2 text-sm transition focus:outline-none flex items-center space-x-1.5">
+                        <i class="fa-solid fa-terminal"></i>
+                        <span>Live Stream Logs</span>
+                    </button>
+                    <button id="tab-btn-results" onclick="showTab('results')" class="border-b-2 border-transparent text-slate-500 hover:text-slate-800 font-bold pb-2 text-sm transition focus:outline-none flex items-center space-x-1.5">
+                        <i class="fa-solid fa-table"></i>
+                        <span>Results Dataset</span>
+                    </button>
+                </div>
+
+                <!-- Live Logs Output Panel -->
+                <div id="tab-content-logs" class="space-y-2">
+                    <div id="log-container" class="console-log text-xs p-4 rounded-lg overflow-y-auto max-h-72 h-72 leading-relaxed flex flex-col-reverse">
+                        <!-- Populated dynamically -->
+                        <div>[Console initialized] Waiting for metrics update...</div>
+                    </div>
+                </div>
+
+                <!-- Results Spreadsheet Panel -->
+                <div id="tab-content-results" class="hidden">
+                    <div class="overflow-x-auto max-h-96 border rounded-lg">
+                        <table class="min-w-full divide-y divide-gray-200 text-left text-xs">
+                            <thead class="bg-slate-100 text-slate-700 font-bold sticky top-0 uppercase tracking-wider">
+                                <tr>
+                                    <th class="px-3 py-2 border-b">Business Name</th>
+                                    <th class="px-3 py-2 border-b">Phone</th>
+                                    <th class="px-3 py-2 border-b">Website</th>
+                                    <th class="px-3 py-2 border-b">Email</th>
+                                    <th class="px-3 py-2 border-b">Email Status</th>
+                                    <th class="px-3 py-2 border-b">Source</th>
+                                </tr>
+                            </thead>
+                            <tbody id="results-table-body" class="divide-y divide-gray-100 bg-white">
+                                <!-- Populated dynamically -->
+                                <tr>
+                                    <td colspan="6" class="text-center py-8 text-gray-400">Loading business listings dataset...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Welcome Empty Panel -->
+            <div id="welcome-panel" class="bg-white rounded-xl shadow-md border border-gray-200 p-8 flex flex-col items-center justify-center text-center py-20">
+                <div class="bg-emerald-50 text-emerald-500 p-5 rounded-full mb-4">
+                    <i class="fa-solid fa-radar fa-3x animate-pulse"></i>
+                </div>
+                <h2 class="text-xl font-extrabold text-slate-900 mb-2">No Active Scraping Job Selected</h2>
+                <p class="text-sm text-slate-500 max-w-sm mb-6">Select a job from the registry sidebar or configure and submit the search configuration form to launch a new lead generation session.</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-slate-950 text-slate-500 py-6 border-t border-slate-900 mt-10">
+        <div class="max-w-7xl mx-auto px-6 text-center text-xs flex flex-col sm:flex-row justify-between items-center gap-4">
+            <p>&copy; 2026 LeadRadar Scraper Platform. Powered by Arena.ai's Agent Mode.</p>
+            <p>Respectful of public robots.txt directives and applicable email anti-spam acts.</p>
+        </div>
+    </footer>
+
+    <!-- JavaScript logic -->
+    <script>
+        let currentJobId = null;
+        let pollInterval = null;
+        
+        // Retrieve API Base URL from localStorage or default to relative path
+        function getApiBaseUrl() {
+            return localStorage.getItem("leadradar_api_base") || "";
+        }
+        
+        function setApiBaseUrl(url) {
+            url = url.trim().replace(/\/$/, ""); // Remove trailing slash
+            localStorage.setItem("leadradar_api_base", url);
+            loadJobs();
+            if (currentJobId) selectJob(currentJobId);
+        }
+
+        // On document load
+        document.addEventListener("DOMContentLoaded", () => {
+            // Setup API base input
+            const apiInput = document.getElementById("api-server-url");
+            if (apiInput) {
+                apiInput.value = getApiBaseUrl();
+                apiInput.addEventListener("change", (e) => {
+                    setApiBaseUrl(e.target.value);
+                });
+            }
+            
+            loadJobs();
+            
+            // Handle form submission
+            document.getElementById("scrape-form").addEventListener("submit", async (e) => {
+                e.preventDefault();
+                await startScraping();
+            });
+        });
+
+        // Load all jobs
+        async function loadJobs() {
+            try {
+                const apiBase = getApiBaseUrl();
+                const response = await fetch(`${apiBase}/api/jobs/`);
+                if (!response.ok) throw new Error("Failed to load jobs");
+                const jobs = await response.json();
+                
+                const container = document.getElementById("jobs-list");
+                if (jobs.length === 0) {
+                    container.innerHTML = `<div class="text-center text-sm text-gray-400 py-4">No jobs registered. Submit a search query.</div>`;
+                    return;
+                }
+                
+                container.innerHTML = jobs.map(job => {
+                    let statusColor = "bg-slate-100 text-slate-800";
+                    let statusIcon = "fa-circle-notch fa-spin text-slate-500";
+                    
+                    if (job.status === "completed") {
+                        statusColor = "bg-emerald-100 text-emerald-800";
+                        statusIcon = "fa-circle-check text-emerald-600";
+                    } else if (job.status === "failed") {
+                        statusColor = "bg-rose-100 text-rose-800";
+                        statusIcon = "fa-circle-xmark text-rose-600";
+                    } else if (job.status === "running") {
+                        statusColor = "bg-blue-100 text-blue-800";
+                        statusIcon = "fa-circle-notch fa-spin text-blue-600";
+                    }
+                    
+                    const isSelected = job.id === currentJobId ? 'border-2 border-emerald-500' : '';
+                    
+                    return `
+                    <div onclick="selectJob('${job.id}')" class="bg-gray-50 border hover:border-slate-300 rounded-lg p-3 cursor-pointer transition flex items-center justify-between ${isSelected}">
+                        <div class="truncate pr-2">
+                            <div class="flex items-center space-x-1.5 mb-1">
+                                <span class="text-xs font-bold text-slate-600">#${job.id}</span>
+                                <span class="text-xs font-semibold ${statusColor} px-2 py-0.5 rounded-full truncate flex items-center space-x-1">
+                                    <i class="fa-solid ${statusIcon}"></i>
+                                    <span>${job.status}</span>
+                                </span>
+                            </div>
+                            <div class="text-sm font-bold text-gray-900 truncate">${job.category}</div>
+                            <div class="text-xs text-gray-500 truncate">${job.city || ''}, ${job.state || ''}</div>
+                        </div>
+                        <div class="text-right flex-shrink-0">
+                            <div class="text-sm font-extrabold text-slate-700">${job.progress}%</div>
+                            <div class="text-xxs font-semibold text-slate-400 uppercase mt-0.5">Progress</div>
+                        </div>
+                    </div>
+                    `;
+                }).join("");
+            } catch (err) {
+                console.error("Error fetching jobs:", err);
+            }
+        }
+
+        // Select a job to view details
+        function selectJob(jobId) {
+            currentJobId = jobId;
+            
+            // Hide welcome, show details panel
+            document.getElementById("welcome-panel").classList.add("hidden");
+            document.getElementById("job-details-panel").classList.remove("hidden");
+            
+            // Highlight in sidebar
+            loadJobs();
+            
+            // Clear any existing poll
+            if (pollInterval) clearInterval(pollInterval);
+            
+            // Perform first fetch immediately
+            fetchJobDetails();
+            
+            // Poll for update
+            pollInterval = setInterval(fetchJobDetails, 2000);
+            
+            // Reset active tabs
+            showTab('logs');
+        }
+
+        // Fetch details of selected job
+        async function fetchJobDetails() {
+            if (!currentJobId) return;
+            
+            try {
+                const apiBase = getApiBaseUrl();
+                
+                // 1. Fetch Job Stats
+                const resJob = await fetch(`${apiBase}/api/jobs/${currentJobId}`);
+                if (!resJob.ok) throw new Error("Failed to load job details");
+                const job = await resJob.json();
+                
+                // Update header
+                document.getElementById("detail-job-id").innerText = `Job #${job.id}`;
+                document.getElementById("detail-job-title").innerText = job.category;
+                document.getElementById("detail-job-location").innerText = `${job.city || ''}, ${job.state || ''}, ${job.country} (Sources: ${job.sources})`;
+                
+                // Progress
+                document.getElementById("detail-progress-percent").innerText = `${job.progress}%`;
+                document.getElementById("detail-progress-bar").style.width = `${job.progress}%`;
+                
+                // Metrics
+                document.getElementById("metric-discovered").innerText = job.total_results;
+                document.getElementById("metric-websites").innerText = job.websites_found;
+                document.getElementById("metric-emails").innerText = job.emails_found;
+                document.getElementById("metric-validated").innerText = job.validated_emails;
+                document.getElementById("metric-duplicates").innerText = job.duplicates_found;
+                document.getElementById("metric-errors").innerText = job.errors_count;
+                
+                // 2. Fetch logs
+                const resLogs = await fetch(`${apiBase}/api/jobs/${currentJobId}/logs`);
+                if (resLogs.ok) {
+                    const logs = await resLogs.json();
+                    const container = document.getElementById("log-container");
+                    
+                    if (logs.length === 0) {
+                        container.innerHTML = `<div>[No logs written yet]</div>`;
+                    } else {
+                        // Display logs in reversed order so they read normally but flex-col-reverse pulls scroll bottom!
+                        container.innerHTML = logs.reverse().map(log => {
+                            let color = "text-emerald-400";
+                            if (log.level === "ERROR") color = "text-rose-500 font-bold";
+                            if (log.level === "WARNING") color = "text-amber-500 font-semibold";
+                            
+                            const timeStr = new Date(log.timestamp).toLocaleTimeString();
+                            return `<div class="mb-1"><span class="text-slate-500">[${timeStr}]</span> <span class="${color}">${log.level}</span>: ${log.message}</div>`;
+                        }).join("");
+                    }
+                }
+                
+                // 3. Fetch businesses results list
+                const resBiz = await fetch(`${apiBase}/api/jobs/${currentJobId}/businesses`);
+                if (resBiz.ok) {
+                    const businesses = await resBiz.json();
+                    const tbody = document.getElementById("results-table-body");
+                    
+                    if (businesses.length === 0) {
+                        tbody.innerHTML = `<tr><td colspan="6" class="text-center py-8 text-gray-400">No results found yet.</td></tr>`;
+                    } else {
+                        tbody.innerHTML = businesses.map(b => {
+                            let statusBadge = `<span class="bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full text-xxs font-bold">none</span>`;
+                            if (b.email_status === "valid") {
+                                statusBadge = `<span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full text-xxs font-bold">valid</span>`;
+                            } else if (b.email_status === "invalid_dns") {
+                                statusBadge = `<span class="bg-rose-100 text-rose-800 px-2 py-0.5 rounded-full text-xxs font-bold">invalid domain</span>`;
+                            } else if (b.email_status === "unverified" && b.email) {
+                                statusBadge = `<span class="bg-slate-100 text-slate-800 px-2 py-0.5 rounded-full text-xxs font-bold">unverified</span>`;
+                            }
+                            
+                            const websiteCell = b.website ? `<a href="${b.website}" target="_blank" class="text-blue-600 hover:underline flex items-center space-x-1"><span>${b.website.replace("http://127.0.0.1:8000/mock-site/", "")}</span> <i class="fa-solid fa-up-right-from-square text-xxs"></i></a>` : `<span class="text-gray-300">-</span>`;
+                            
+                            return `
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-3 py-2 font-semibold text-gray-950 truncate max-w-xs">${b.business_name}</td>
+                                <td class="px-3 py-2 text-gray-700 whitespace-nowrap">${b.phone || '<span class="text-gray-300">-</span>'}</td>
+                                <td class="px-3 py-2 truncate max-w-xs">${websiteCell}</td>
+                                <td class="px-3 py-2 font-medium text-slate-900">${b.email ? `<strong>${b.email}</strong>` : '<span class="text-gray-300">-</span>'}</td>
+                                <td class="px-3 py-2">${statusBadge}</td>
+                                <td class="px-3 py-2 whitespace-nowrap text-slate-500 uppercase font-semibold text-xxs">${b.source}</td>
+                            </tr>
+                            `;
+                        }).join("");
+                    }
+                }
+                
+                // Stop polling if complete or failed
+                if (job.status === "completed" || job.status === "failed" || job.status === "cancelled") {
+                    clearInterval(pollInterval);
+                    pollInterval = null;
+                    loadJobs(); // final reload for status color
+                }
+                
+            } catch (err) {
+                console.error("Error polling details:", err);
+            }
+        }
+
+        // Toggle active tabs
+        function showTab(tabName) {
+            const tabLogs = document.getElementById("tab-content-logs");
+            const tabResults = document.getElementById("tab-content-results");
+            const btnLogs = document.getElementById("tab-btn-logs");
+            const btnResults = document.getElementById("tab-btn-results");
+            
+            if (tabName === "logs") {
+                tabLogs.classList.remove("hidden");
+                tabResults.classList.add("hidden");
+                btnLogs.className = "border-b-2 border-emerald-600 text-emerald-700 font-bold pb-2 text-sm transition focus:outline-none flex items-center space-x-1.5";
+                btnResults.className = "border-b-2 border-transparent text-slate-500 hover:text-slate-800 font-bold pb-2 text-sm transition focus:outline-none flex items-center space-x-1.5";
+            } else {
+                tabLogs.classList.add("hidden");
+                tabResults.classList.remove("hidden");
+                btnLogs.className = "border-b-2 border-transparent text-slate-500 hover:text-slate-800 font-bold pb-2 text-sm transition focus:outline-none flex items-center space-x-1.5";
+                btnResults.className = "border-b-2 border-emerald-600 text-emerald-700 font-bold pb-2 text-sm transition focus:outline-none flex items-center space-x-1.5";
+            }
+        }
+
+        // Submit new scraper job
+        async function startScraping() {
+            const category = document.getElementById("category").value;
+            const country = document.getElementById("country").value;
+            const state = document.getElementById("state").value || null;
+            const city = document.getElementById("city").value || null;
+            const max_results = parseInt(document.getElementById("max_results").value);
+            
+            const sources = [];
+            if (document.getElementById("source_yp").checked) sources.push("yellowpages");
+            if (document.getElementById("source_yelp").checked) sources.push("yelp");
+            
+            if (sources.length === 0) {
+                alert("Please select at least one source directory (Yellow Pages or Yelp).");
+                return;
+            }
+            
+            const enrich_website = document.getElementById("enrich_website").checked;
+            const enrich_email = document.getElementById("enrich_email").checked;
+            const enrich_validate = document.getElementById("enrich_validate").checked;
+            const enrich_dedupe = document.getElementById("enrich_dedupe").checked;
+            
+            const payload = {
+                category,
+                country,
+                state,
+                city,
+                max_results,
+                sources,
+                enrich_website,
+                enrich_email,
+                enrich_contact: true,
+                enrich_validate,
+                enrich_dedupe
+            };
+            
+            try {
+                const apiBase = getApiBaseUrl();
+                const response = await fetch(`${apiBase}/api/jobs/`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
+                
+                if (!response.ok) throw new Error("Failed to create job");
+                const job = await response.json();
+                
+                // Select the new job
+                selectJob(job.id);
+                loadJobs();
+                
+            } catch (err) {
+                alert("Error starting scraping pipeline: " + err.message);
+            }
+        }
+
+        // Export data
+        function exportData(format) {
+            if (!currentJobId) return;
+            const apiBase = getApiBaseUrl();
+            window.location.href = `${apiBase}/api/jobs/${currentJobId}/export/${format}`;
+        }
+    </script>
+</body>
+</html>
