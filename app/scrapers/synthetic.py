@@ -17,7 +17,10 @@ BUSINESS_NAME_PARTS = {
                    []),
     "lawyer": (["Baker & Associates", "Justice", "Sentinel", "Summit", "Vanguard", "Fairpoint", "Stonehenge"],
                ["Law", "Law Firm", "Legal Group", "Defense", "Partners"],
-               ["L.L.P.", "P.C."])
+               ["L.L.P.", "P.C."]),
+    "med_spa": (["Glow", "Radiant", "Serene", "La Bella", "Revitalize", "Pure", "Aura", "Zen", "Bliss", "Skin & Body", "Youthful", "Aesthetic"],
+                ["Med Spa", "Medical Spa", "Aesthetics", "Aesthetics & Wellness", "Skin Clinic", "Laser Center", "Wellness Spa"],
+                ["LLC", "Inc.", "Group", ""])
 }
 
 STREET_NAMES = ["Oak St", "Elm Road", "Westheimer Rd", "Broadway Ave", "Main St", "Washington Ave", "Post Oak Blvd", "Richmond Ave", "Memorial Dr", "Shepherd Dr"]
@@ -55,6 +58,8 @@ def generate_synthetic_businesses(category: str, country: str, state: Optional[s
         cat_keyword = "restaurant"
     elif "law" in category_lower or "legal" in category_lower or "attorney" in category_lower:
         cat_keyword = "lawyer"
+    elif "spa" in category_lower or "med" in category_lower or "aesthetic" in category_lower or "skin" in category_lower:
+        cat_keyword = "med_spa"
         
     parts = BUSINESS_NAME_PARTS.get(cat_keyword)
     
@@ -67,7 +72,11 @@ def generate_synthetic_businesses(category: str, country: str, state: Optional[s
     # Generate seed-based random to have consistent results per category/city if desired
     # We will use normal random for now
     
-    count = min(max_results, random.randint(15, 30)) # Limit to a reasonable number for demo/tests
+    # Determine number of records to generate
+    if max_results >= 50:
+        count = max_results
+    else:
+        count = min(max_results, random.randint(15, 30))
     
     for i in range(count):
         # Build business name
