@@ -293,7 +293,7 @@
         
         // Retrieve API Base URL from localStorage or default to relative path
         function getApiBaseUrl() {
-            return localStorage.getItem("leadradar_api_base") || "";
+            return localStorage.getItem("leadradar_api_base") || "https://leadradar-scraper-production.up.railway.app";
         }
         
         function setApiBaseUrl(url) {
