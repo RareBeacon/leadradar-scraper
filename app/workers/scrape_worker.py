@@ -9,7 +9,7 @@ import app.database.repository as repo
 from app.database.models import Job, Business
 from app.scrapers.registry import get_scraper
 from app.enrichment.email_discovery import WebsiteCrawler, find_best_email
-from app.validation.email import validate_email_address
+from app.validation.email_engine import verify_email_multi_layer
 from app.deduplication.matcher import match_businesses, clean_name
 from app.extraction.phone import normalize_phone_number
 from app.core.logging import logger
@@ -150,17 +150,19 @@ class ScrapeWorker:
                                 biz_data["confidence"] = best_email_data["confidence"]
                                 biz_data["email_status"] = "unverified"
                                 
-                                # Optional validation layer
+                                # Optional validation layer (Multi-Layer Verification Engine)
                                 if job.enrich_validate:
                                     repo.add_job_log(db, job_id, "INFO", f"Validating discovered email: {biz_data['email']}")
-                                    is_valid, status_str = validate_email_address(biz_data["email"])
-                                    if is_valid:
+                                    verification = await verify_email_multi_layer(biz_data["email"])
+                                    status = verification["status"]
+                                    
+                                    if status == "valid":
                                         validated_emails += 1
                                         biz_data["email_status"] = "valid"
-                                        biz_data["confidence"] = min(0.99, biz_data["confidence"] + 0.10)
+                                        biz_data["confidence"] = verification["confidence"]
                                     else:
-                                        repo.add_job_log(db, job_id, "WARNING", f"Email '{biz_data['email']}' failed validation ({status_str}). Deleting email from lead record.")
-                                        # Delete / nullify the email if it is not validated
+                                        repo.add_job_log(db, job_id, "WARNING", f"Email '{biz_data['email']}' failed verification (Status: {status}, Reason: {verification['reason']}). Deleting email from lead record.")
+                                        # Delete / nullify the email if it is not verified as valid
                                         biz_data["email"] = None
                                         biz_data["email_source"] = None
                                         biz_data["email_type"] = None
