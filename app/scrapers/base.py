@@ -33,7 +33,11 @@ class BaseScraper:
         Asynchronously fetches HTML with retry logic and exponential backoff.
         Handles Layer 1 & 2 requirements.
         """
-        async with httpx.AsyncClient(headers=self.headers, timeout=settings.SCRAPER_TIMEOUT, follow_redirects=True) as client:
+        proxies = None
+        if settings.PROXY_URL:
+            proxies = {"all://": settings.PROXY_URL}
+            
+        async with httpx.AsyncClient(headers=self.headers, timeout=settings.SCRAPER_TIMEOUT, follow_redirects=True, proxies=proxies) as client:
             for attempt in range(retries):
                 try:
                     # Delay to prevent hammering

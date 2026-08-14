@@ -8,7 +8,7 @@ class JobCreate(BaseModel):
     state: Optional[str] = Field(None, example="Texas")
     city: Optional[str] = Field(None, example="Houston")
     sources: List[str] = Field(default=["yellowpages", "yelp"])
-    max_results: int = Field(default=100, ge=1, le=1000)
+    max_results: int = Field(default=100, ge=1, le=1000000)
     enrich_website: bool = True
     enrich_email: bool = True
     enrich_contact: bool = True

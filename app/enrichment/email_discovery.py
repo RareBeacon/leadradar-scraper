@@ -111,7 +111,11 @@ class WebsiteCrawler:
         
         # We will share a single client session
         limits = httpx.Limits(max_keepalive_connections=5, max_connections=10)
-        async with httpx.AsyncClient(headers=self.headers, limits=limits, timeout=10.0, follow_redirects=True) as client:
+        proxies = None
+        if settings.PROXY_URL:
+            proxies = {"all://": settings.PROXY_URL}
+            
+        async with httpx.AsyncClient(headers=self.headers, limits=limits, timeout=10.0, follow_redirects=True, proxies=proxies) as client:
             # 1. Fetch homepage
             homepage_html = await self.fetch_page(client, normalized_url)
             if not homepage_html:
