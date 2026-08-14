@@ -147,11 +147,17 @@ class ScrapeWorker:
                                 if job.enrich_validate:
                                     repo.add_job_log(db, job_id, "INFO", f"Validating discovered email: {biz_data['email']}")
                                     is_valid, status_str = validate_email_address(biz_data["email"])
-                                    biz_data["email_status"] = status_str
                                     if is_valid:
                                         validated_emails += 1
+                                        biz_data["email_status"] = "valid"
                                         biz_data["confidence"] = min(0.99, biz_data["confidence"] + 0.10)
                                     else:
+                                        repo.add_job_log(db, job_id, "WARNING", f"Email '{biz_data['email']}' failed validation ({status_str}). Deleting email from lead record.")
+                                        # Delete / nullify the email if it is not validated
+                                        biz_data["email"] = None
+                                        biz_data["email_source"] = None
+                                        biz_data["email_type"] = None
+                                        biz_data["email_status"] = None
                                         biz_data["confidence"] = max(0.10, biz_data["confidence"] - 0.20)
                                         
                                     repo.add_job_log(db, job_id, "INFO", f"Email validation status: {status_str} for {biz_data['email']}")

@@ -134,6 +134,27 @@ def extract_jsonld_emails(html: str) -> List[Dict[str, str]]:
             pass
     return emails
 
+def extract_attributes_emails(html: str) -> List[Dict[str, str]]:
+    """
+    Method 5: Extracts emails from standard HTML element attributes.
+    """
+    emails = []
+    parser = HTMLParser(html)
+    for tag in parser.css('*'):
+        for attr in ["title", "placeholder", "value", "content", "data-email", "data-contact"]:
+            val = tag.attributes.get(attr, "")
+            if val and "@" in val:
+                matches = EMAIL_REGEX.findall(val)
+                for m in matches:
+                    cleaned = clean_email(m)
+                    if cleaned:
+                        emails.append({
+                            "email": cleaned,
+                            "type": "attribute",
+                            "source": f"attr_{attr}"
+                        })
+    return emails
+
 def extract_all_emails(html: str) -> List[Dict[str, Any]]:
     """
     Aggregates all email extraction methods and removes exact duplicates,
@@ -147,9 +168,10 @@ def extract_all_emails(html: str) -> List[Dict[str, Any]]:
     jsonld = extract_jsonld_emails(html)
     regex = extract_regex_emails(html)
     obfuscated = extract_obfuscated_emails(html)
+    attributes = extract_attributes_emails(html)
     
-    # Prioritize mailto and jsonld over raw text regex and obfuscation
-    for item in mailto + jsonld + obfuscated + regex:
+    # Prioritize mailto and jsonld over raw text regex, obfuscation and attributes
+    for item in mailto + jsonld + obfuscated + attributes + regex:
         email_addr = item["email"]
         if email_addr not in seen_emails:
             seen_emails.add(email_addr)

@@ -48,13 +48,21 @@ def validate_email_address(email: str) -> Tuple[bool, str]:
     if not validate_email_syntax(email):
         return False, "invalid_syntax"
         
-    # Filter out obvious test/fake accounts
+    # Filter out obvious test/fake accounts and automated system junk
     username, domain = email.split("@", 1)
     if username in ["test", "example", "username", "yourname", "email"]:
         return False, "fake_username"
         
     if domain in ["example.com", "test.com", "email.com", "domain.com"]:
         return False, "fake_domain"
+        
+    # Filter out automated transactional/system/junk aliases
+    JUNK_USERNAMES = [
+        "noreply", "no-reply", "bounce", "donotreply", "do-not-reply", 
+        "mailer-daemon", "mail-daemon", "spam", "abuse", "root", "postmaster"
+    ]
+    if username in JUNK_USERNAMES or any(j in username for j in ["no-reply", "noreply", "mailer-daemon"]):
+        return False, "system_junk_email"
         
     # 2. DNS / MX check
     mx_valid = check_dns_mx(domain)
