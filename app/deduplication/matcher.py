@@ -32,8 +32,8 @@ def extract_domain(url: Optional[str]) -> Optional[str]:
         netloc = parsed.netloc
         if netloc.startswith("www."):
             netloc = netloc[4:]
-        # Skip some directory sites
-        if any(x in netloc for x in ["yellowpages.com", "yelp.com", "facebook.com", "twitter.com", "instagram.com"]):
+        # Skip some directory sites & localhost/loopback addresses
+        if any(x in netloc for x in ["yellowpages.com", "yelp.com", "facebook.com", "twitter.com", "instagram.com", "127.0.0.1", "localhost", "0.0.0.0"]):
             return None
         return netloc
     except Exception:

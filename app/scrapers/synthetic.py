@@ -90,7 +90,9 @@ def generate_synthetic_businesses(category: str, country: str, state: Optional[s
         slug = name.lower().replace(" ", "-").replace("&", "and").replace(".", "").replace(",", "")
         # The official website will point to our FastAPI local web server!
         # This will allow our enrichment worker to crawl actual mock HTML pages on our server!
-        website = f"http://127.0.0.1:8000/mock-site/{slug}"
+        import os
+        port = os.environ.get("PORT", "8000")
+        website = f"http://127.0.0.1:{port}/mock-site/{slug}"
         
         # Source URLs
         if source == "yellowpages":

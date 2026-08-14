@@ -25,13 +25,20 @@ class WebsiteCrawler:
 
     def clean_url(self, url: str) -> str:
         """
-        Normalize a URL by adding scheme if missing.
+        Normalize a URL by adding scheme if missing and resolving local container ports.
         """
         url = url.strip()
         if not url:
             return ""
         if not url.startswith(("http://", "https://")):
             url = "http://" + url
+            
+        # Dynamically replace loopback port 8000 with the active container PORT if on Railway/Render
+        import os
+        port = os.environ.get("PORT")
+        if port and ("127.0.0.1:8000" in url or "localhost:8000" in url):
+            url = url.replace("127.0.0.1:8000", f"127.0.0.1:{port}").replace("localhost:8000", f"localhost:{port}")
+            
         return url
 
     def extract_internal_links(self, html: str, base_url: str) -> List[str]:
