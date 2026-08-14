@@ -70,6 +70,8 @@ def match_businesses(b1: Dict[str, Any], b2: Dict[str, Any]) -> Tuple[bool, floa
     if has_street:
         street_sim = fuzz.token_sort_ratio(street1.lower(), street2.lower()) / 100.0
         if name_similarity >= 0.80 and street_sim >= 0.80:
+            if phone1 and phone2 and phone1 != phone2:
+                return False, 0.0, "different_phones_distinct_listings"
             return True, 0.92, f"name_and_street_match (name_sim={name_similarity:.2f}, street_sim={street_sim:.2f})"
             
     # Check city match (if exists)
@@ -79,6 +81,8 @@ def match_businesses(b1: Dict[str, Any], b2: Dict[str, Any]) -> Tuple[bool, floa
     
     if has_city and city1.lower() == city2.lower():
         if name_similarity >= 0.90:
+            if phone1 and phone2 and phone1 != phone2:
+                return False, 0.0, "different_phones_distinct_listings"
             return True, 0.85, f"name_and_city_match (name_sim={name_similarity:.2f})"
             
     # Absolute name identity
