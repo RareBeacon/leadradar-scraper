@@ -611,30 +611,70 @@
                     <p class="text-sm font-bold text-white py-1" id="modal-biz-email">-</p>
                 </div>
 
-                <div id="modal-yc-enrichment" class="hidden bg-slate-950/40 border border-violet-950/30 p-4 rounded-xl space-y-3.5">
-                    <div class="text-xxs font-extrabold uppercase tracking-wider text-fuchsia-400 flex items-center"><i class="fa-solid fa-rocket mr-1.5"></i>YCombinator Sourced Details</div>
-                    <div class="grid grid-cols-2 gap-3 text-xs">
-                        <div>
-                            <span class="text-slate-400 block font-semibold">Founders:</span>
-                            <span id="modal-yc-founders" class="text-white font-bold">-</span>
+                <div id="modal-yc-enrichment" class="hidden bg-slate-950/40 border border-violet-950/30 p-4 rounded-xl space-y-4">
+                    <!-- 1. FOUNDER PROFILE CARD -->
+                    <div class="border-b border-violet-950/20 pb-3.5">
+                        <div class="text-xxs font-extrabold uppercase tracking-wider text-fuchsia-400 flex items-center mb-2.5">
+                            <i class="fa-solid fa-user-tie mr-1.5"></i>Founder Profile
+                        </div>
+                        <div class="grid grid-cols-2 gap-3 text-xs mb-2">
+                            <div>
+                                <span class="text-slate-400 block">Founder Name:</span>
+                                <span id="modal-yc-primary-founder" class="text-white font-extrabold text-sm">-</span>
+                            </div>
+                            <div>
+                                <span class="text-slate-400 block">Company Name:</span>
+                                <span id="modal-yc-founder-company" class="text-white font-bold">-</span>
+                            </div>
+                            <div>
+                                <span class="text-slate-400 block">YC Batch (Years):</span>
+                                <span class="inline-block bg-fuchsia-500/10 text-fuchsia-400 border border-fuchsia-500/20 text-xxs px-2 py-0.5 rounded font-extrabold mt-0.5" id="modal-yc-batch">YC W26</span>
+                            </div>
+                            <div>
+                                <span class="text-slate-400 block">Location:</span>
+                                <span id="modal-yc-founder-loc" class="text-white font-semibold">-</span>
+                            </div>
                         </div>
                         <div>
-                            <span class="text-slate-400 block font-semibold">Team Size:</span>
-                            <span id="modal-yc-employees" class="text-white font-bold">-</span>
+                            <span class="text-slate-400 block mb-1 text-xs">Social Media Links:</span>
+                            <div class="flex items-center space-x-2">
+                                <a id="modal-yc-linkedin" href="#" target="_blank" class="bg-blue-600/10 hover:bg-blue-600/20 text-blue-400 border border-blue-500/20 text-xxs px-2.5 py-1 rounded flex items-center space-x-1 font-bold">
+                                    <span>LinkedIn</span> <i class="fa-brands fa-linkedin"></i>
+                                </a>
+                                <a id="modal-yc-twitter" href="#" target="_blank" class="bg-sky-600/10 hover:bg-sky-600/20 text-sky-400 border border-sky-500/20 text-xxs px-2.5 py-1 rounded flex items-center space-x-1 font-bold">
+                                    <span>Twitter</span> <i class="fa-brands fa-twitter"></i>
+                                </a>
+                            </div>
                         </div>
                     </div>
-                    <div class="grid grid-cols-2 gap-3 text-xs">
-                        <div>
-                            <span class="text-slate-400 block font-semibold">LinkedIn Profile:</span>
-                            <a id="modal-yc-linkedin" href="#" target="_blank" class="text-blue-400 hover:underline flex items-center space-x-1 font-bold"><span>LinkedIn</span> <i class="fa-brands fa-linkedin"></i></a>
+
+                    <!-- 2. COMPANY PROFILE CARD -->
+                    <div>
+                        <div class="text-xxs font-extrabold uppercase tracking-wider text-violet-400 flex items-center mb-2.5">
+                            <i class="fa-solid fa-building mr-1.5"></i>Company Details
                         </div>
-                        <div>
-                            <span class="text-slate-400 block font-semibold">Twitter Profile:</span>
-                            <a id="modal-yc-twitter" href="#" target="_blank" class="text-sky-400 hover:underline flex items-center space-x-1 font-bold"><span>Twitter</span> <i class="fa-brands fa-twitter"></i></a>
+                        <div class="grid grid-cols-2 gap-3 text-xs mb-3">
+                            <div>
+                                <span class="text-slate-400 block">Company:</span>
+                                <span id="modal-yc-co-name" class="text-white font-bold">-</span>
+                            </div>
+                            <div>
+                                <span class="text-slate-400 block">Number of Employees:</span>
+                                <span id="modal-yc-employees" class="text-white font-bold">-</span>
+                            </div>
+                            <div>
+                                <span class="text-slate-400 block">HQ Locations:</span>
+                                <span id="modal-yc-co-loc" class="text-white font-semibold">-</span>
+                            </div>
+                            <div>
+                                <span class="text-slate-400 block">Co-Founders:</span>
+                                <span id="modal-yc-founders" class="text-white font-bold">-</span>
+                            </div>
                         </div>
-                    </div>
-                    <div class="border-t border-violet-950/20 pt-2 text-xxs text-slate-300 leading-relaxed italic border-l-2 border-fuchsia-500 pl-2.5 bg-fuchsia-500/5 py-1.5 rounded" id="modal-yc-launch">
-                        -
+                        <div class="text-xxs font-semibold text-slate-400 block mb-1">Company Description & Launches Pitch:</div>
+                        <div class="text-xxs text-slate-300 leading-relaxed italic border-l-2 border-fuchsia-500 pl-2.5 bg-fuchsia-500/5 py-1.5 rounded" id="modal-yc-launch">
+                            -
+                        </div>
                     </div>
                 </div>
 
@@ -1152,6 +1192,13 @@
             // YC Sourced conditional elements
             const ycPanel = document.getElementById("modal-yc-enrichment");
             if (lead.founders) {
+                const primaryFounder = lead.founders.split(",")[0];
+                document.getElementById("modal-yc-primary-founder").innerText = primaryFounder;
+                document.getElementById("modal-yc-founder-company").innerText = lead.business_name;
+                document.getElementById("modal-yc-founder-loc").innerText = `${lead.city || 'San Francisco'}, ${lead.country || 'USA'}`;
+                
+                document.getElementById("modal-yc-co-name").innerText = lead.business_name;
+                document.getElementById("modal-yc-co-loc").innerText = `${lead.city || 'San Francisco'}, ${lead.country || 'USA'}`;
                 document.getElementById("modal-yc-founders").innerText = lead.founders;
                 document.getElementById("modal-yc-employees").innerText = `${lead.employees_count || '5'} Employees`;
                 
