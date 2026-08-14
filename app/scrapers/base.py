@@ -7,12 +7,13 @@ from app.core.config import settings
 from app.core.logging import logger
 
 class BaseScraper:
-    def __init__(self, category: str, country: str, state: Optional[str] = None, city: Optional[str] = None, max_results: int = 100):
+    def __init__(self, category: str, country: str, state: Optional[str] = None, city: Optional[str] = None, max_results: int = 100, yc_view: Optional[str] = None, **kwargs):
         self.category = category
         self.country = country
         self.state = state
         self.city = city
         self.max_results = max_results
+        self.yc_view = yc_view
         
         # Build location string
         loc_parts = [p for p in [city, state, country] if p]
