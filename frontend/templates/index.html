@@ -337,6 +337,16 @@
                             </div>
                         </div>
                     </div>
+
+                    <!-- YC Sourcing View Selector (Toggled dynamically) -->
+                    <div id="yc-view-selector-container" class="hidden bg-slate-950/40 border border-violet-950/20 p-3 rounded-xl space-y-1">
+                        <label class="block text-xs font-bold uppercase tracking-wider text-fuchsia-400 mb-1">YC Sourcing View</label>
+                        <select id="yc_view" class="w-full bg-slate-950 border border-violet-950/60 rounded-lg px-3 py-2 text-xs text-white focus:ring-2 focus:ring-violet-500">
+                            <option value="companies" selected>Companies Directory (/companies)</option>
+                            <option value="founders">Founders Directory (/founders)</option>
+                            <option value="launches">Launches Feed (/launches)</option>
+                        </select>
+                    </div>
                     
                     <div class="border-t border-violet-950/40 pt-4 mt-2 space-y-2">
                         <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">Enrichment Layers</label>
@@ -749,6 +759,19 @@
                 await startScraping();
             });
             
+            // YC Sourcing View dynamic toggle
+            const sourceYcCheckbox = document.getElementById("source_yc");
+            const ycViewContainer = document.getElementById("yc-view-selector-container");
+            if (sourceYcCheckbox && ycViewContainer) {
+                sourceYcCheckbox.addEventListener("change", (e) => {
+                    if (e.target.checked) {
+                        ycViewContainer.classList.remove("hidden");
+                    } else {
+                        ycViewContainer.classList.add("hidden");
+                    }
+                });
+            }
+            
             document.getElementById("login-form").addEventListener("submit", (e) => {
                 e.preventDefault();
                 login();
@@ -1034,6 +1057,10 @@
             const enrich_validate = document.getElementById("enrich_validate").checked;
             const enrich_dedupe = document.getElementById("enrich_dedupe").checked;
             
+            const yc_view = document.getElementById("source_yc").checked 
+                ? document.getElementById("yc_view").value 
+                : null;
+            
             const payload = {
                 category,
                 country,
@@ -1041,6 +1068,7 @@
                 city,
                 max_results,
                 sources,
+                yc_view,
                 enrich_website,
                 enrich_email,
                 enrich_contact: true,

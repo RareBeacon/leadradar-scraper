@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from app.database.models import Job, Business, JobLog
 from app.core.logging import logger
 
-def create_job(db: Session, job_id: str, category: str, country: str, state: Optional[str], city: Optional[str], max_results: int, sources: List[str], enrich_website: bool, enrich_email: bool, enrich_contact: bool, enrich_validate: bool, enrich_dedupe: bool) -> Job:
+def create_job(db: Session, job_id: str, category: str, country: str, state: Optional[str], city: Optional[str], max_results: int, sources: List[str], enrich_website: bool, enrich_email: bool, enrich_contact: bool, enrich_validate: bool, enrich_dedupe: bool, yc_view: Optional[str] = None) -> Job:
     job = Job(
         id=job_id,
         category=category,
@@ -13,6 +13,7 @@ def create_job(db: Session, job_id: str, category: str, country: str, state: Opt
         city=city,
         max_results=max_results,
         sources=",".join(sources),
+        yc_view=yc_view,
         enrich_website=enrich_website,
         enrich_email=enrich_email,
         enrich_contact=enrich_contact,

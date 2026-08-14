@@ -13,6 +13,7 @@ class Job(Base):
     city = Column(String, nullable=True)
     max_results = Column(Integer, default=100)
     sources = Column(String, nullable=False) # Comma-separated like "yellowpages,yelp"
+    yc_view = Column(String, nullable=True) # "companies", "founders", "launches"
     
     # Enrichment configurations
     enrich_website = Column(Boolean, default=True)

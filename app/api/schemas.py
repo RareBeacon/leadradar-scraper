@@ -9,6 +9,7 @@ class JobCreate(BaseModel):
     city: Optional[str] = Field(None, example="Houston")
     sources: List[str] = Field(default=["yellowpages", "yelp"])
     max_results: int = Field(default=100, ge=1, le=1000000)
+    yc_view: Optional[str] = Field(None, example="companies") # "companies", "founders", "launches"
     enrich_website: bool = True
     enrich_email: bool = True
     enrich_contact: bool = True
@@ -23,6 +24,7 @@ class JobResponse(BaseModel):
     city: Optional[str]
     sources: str
     max_results: int
+    yc_view: Optional[str] = None
     enrich_website: bool
     enrich_email: bool
     enrich_contact: bool

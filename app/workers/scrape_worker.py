@@ -49,7 +49,8 @@ class ScrapeWorker:
                     country=job.country,
                     state=job.state,
                     city=job.city,
-                    max_results=job.max_results
+                    max_results=job.max_results,
+                    yc_view=job.yc_view
                 )
                 
                 if not scraper:

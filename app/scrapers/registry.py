@@ -10,12 +10,21 @@ SCRAPER_REGISTRY: Dict[str, Type[BaseScraper]] = {
     "ycombinator": YCombinatorScraper
 }
 
-def get_scraper(source: str, category: str, country: str, state: Optional[str] = None, city: Optional[str] = None, max_results: int = 100) -> Optional[BaseScraper]:
+def get_scraper(source: str, category: str, country: str, state: Optional[str] = None, city: Optional[str] = None, max_results: int = 100, yc_view: Optional[str] = None) -> Optional[BaseScraper]:
     """
     Returns an instantiated scraper adapter for the given source name.
     """
     scraper_cls = SCRAPER_REGISTRY.get(source.lower().strip())
     if scraper_cls:
+        if scraper_cls == YCombinatorScraper:
+            return scraper_cls(
+                category=category,
+                country=country,
+                state=state,
+                city=city,
+                max_results=max_results,
+                yc_view=yc_view
+            )
         return scraper_cls(
             category=category,
             country=country,

@@ -36,7 +36,8 @@ def create_scraping_job(payload: JobCreate, background_tasks: BackgroundTasks, d
         enrich_email=payload.enrich_email,
         enrich_contact=payload.enrich_contact,
         enrich_validate=payload.enrich_validate,
-        enrich_dedupe=payload.enrich_dedupe
+        enrich_dedupe=payload.enrich_dedupe,
+        yc_view=payload.yc_view
     )
     
     # Dispatch background task asynchronously using FastAPI's robust native BackgroundTasks
