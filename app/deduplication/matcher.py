@@ -83,6 +83,9 @@ def match_businesses(b1: Dict[str, Any], b2: Dict[str, Any]) -> Tuple[bool, floa
             
     # Absolute name identity
     if name_similarity >= 0.95:
+        # If they have different phone numbers, they are distinct branches/entities, not duplicates
+        if phone1 and phone2 and phone1 != phone2:
+            return False, 0.0, "different_phones_distinct_listings"
         return True, 0.80, f"high_name_similarity_match (name_sim={name_similarity:.2f})"
         
     return False, 0.0, "no_match"
